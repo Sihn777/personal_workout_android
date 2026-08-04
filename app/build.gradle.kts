@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace = "kr.youngho.bodyweightcoach"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "kr.youngho.bodyweightcoach"
         minSdk = 28
         targetSdk = 35
-        versionCode = 6
-        versionName = "6.0-health-connect"
+        versionCode = 7
+        versionName = "6.0.1-health-connect"
     }
 
     buildTypes {
