@@ -1,0 +1,15 @@
+{
+  "name": "맨몸 코치",
+  "short_name": "맨몸코치",
+  "description": "개인 맞춤 맨몸운동 루틴, 수행능력 평가, 운동일지",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#111827",
+  "lang": "ko-KR",
+  "icons": [
+    {"src":"icon-192.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"},
+    {"src":"icon-512.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}

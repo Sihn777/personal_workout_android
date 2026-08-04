@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">맨몸 코치</string>
+    <string name="health_connect_rationale_title">Health Connect 데이터 사용 안내</string>
+</resources>

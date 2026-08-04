@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="description" content="개인 맞춤 맨몸운동 루틴, 자동 준비운동·권장 휴식 타이머, 수행능력 평가, 운동일지 PWA" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <title>맨몸 코치 · Health Connect</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#667085;--line:#e5e7eb;
+      --brand:#111827;--brand2:#374151;--good:#087a55;--warn:#a15c00;--bad:#b42318;
+      --accent:#2563eb;--shadow:0 8px 24px rgba(16,24,40,.07);--radius:18px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Roboto,Arial,sans-serif;line-height:1.48}
+    button,input,select,textarea{font:inherit} button{cursor:pointer}
+    .app{max-width:760px;margin:0 auto;min-height:100vh;padding-bottom:92px}
+    header{position:sticky;top:0;z-index:20;background:rgba(245,247,251,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(229,231,235,.8);padding:14px 16px 10px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px}.title{font-weight:800;font-size:20px;letter-spacing:-.3px}.subtitle{font-size:12px;color:var(--muted)}
+    .pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:12px;color:var(--brand2)}
+    main{padding:16px}.view{display:none}.view.active{display:block}
+    .hero{background:linear-gradient(135deg,#111827,#374151);color:white;border-radius:24px;padding:20px;box-shadow:var(--shadow);margin-bottom:14px}.hero h1{font-size:24px;margin:4px 0 6px}.hero p{margin:0;color:#d1d5db}.hero .row{margin-top:16px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:12px}.card h2,.card h3{margin:0 0 8px}.card h2{font-size:18px}.card h3{font-size:16px}.muted{color:var(--muted)}.small{font-size:12px}.strong{font-weight:750}.section-title{display:flex;align-items:center;justify-content:space-between;margin:20px 2px 10px}.section-title h2{font-size:18px;margin:0}
+    .stat{background:white;border:1px solid var(--line);border-radius:16px;padding:14px}.stat b{display:block;font-size:22px}.stat span{font-size:12px;color:var(--muted)}
+    .btn{border:0;border-radius:13px;padding:11px 14px;background:var(--brand);color:#fff;font-weight:700}.btn.secondary{background:#eef2f6;color:var(--brand)}.btn.outline{background:#fff;color:var(--brand);border:1px solid var(--line)}.btn.danger{background:#fee4e2;color:var(--bad)}.btn.smallbtn{padding:8px 10px;font-size:12px}.btn:disabled{opacity:.45;cursor:not-allowed}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.row.between{justify-content:space-between}.stack{display:flex;flex-direction:column;gap:10px}
+    .routine-item{border:1px solid var(--line);border-radius:15px;padding:12px;background:#fff}.routine-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.routine-item.done{opacity:.62;background:#f8fafc}.routine-item.done .routine-name{text-decoration:line-through}.routine-name{font-weight:750}.routine-meta{font-size:12px;color:var(--muted);margin-top:3px}.check{width:25px;height:25px;border-radius:8px;border:2px solid #cbd5e1;display:grid;place-items:center;background:white;color:white;flex:0 0 auto}.done .check{background:var(--good);border-color:var(--good)}
+    .set-grid{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.set-chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:12px}.set-chip.done{background:#dcfae6;border-color:#75e0a7;color:#05603a}
+    details{border-top:1px solid var(--line);margin-top:10px;padding-top:8px}summary{cursor:pointer;font-size:13px;color:var(--accent);font-weight:650}.detail-body{font-size:13px;color:#344054;padding:8px 0 2px}.detail-body ul{margin:6px 0 0;padding-left:18px}.detail-body li{margin:4px 0}
+    .week-day{border-left:4px solid #d0d5dd}.week-day.today{border-left-color:var(--accent)}.tag{display:inline-block;border-radius:999px;background:#eef4ff;color:#3538cd;padding:5px 8px;font-size:11px;font-weight:700}.tag.good{background:#dcfae6;color:#05603a}.tag.warn{background:#fff4e5;color:#93370d}.tag.bad{background:#fee4e2;color:#b42318}
+    .scorebar{height:10px;border-radius:999px;background:#eef2f6;overflow:hidden}.scorebar i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#7c3aed);border-radius:999px}
+    .test-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}.test-row:last-child{border-bottom:0}.score{min-width:43px;text-align:center;border-radius:10px;padding:6px 8px;background:#eef2f6;font-weight:800}
+    label{font-size:13px;font-weight:650;color:#344054}.field{display:flex;flex-direction:column;gap:6px}.field input,.field select,.field textarea{border:1px solid #d0d5dd;border-radius:12px;padding:11px 12px;background:#fff;color:var(--text)}.field textarea{min-height:88px;resize:vertical}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .log{border-bottom:1px solid var(--line);padding:12px 0}.log:last-child{border-bottom:0}.log-title{font-weight:750}.log-meta{font-size:12px;color:var(--muted)}
+    .exercise-search{position:sticky;top:73px;z-index:10;background:var(--bg);padding:2px 0 10px}.exercise-search input{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:white}
+    .exercise-card .muscle{font-size:12px;color:var(--muted);margin-bottom:8px}.exercise-card ol,.exercise-card ul{padding-left:20px;margin:8px 0}.exercise-card li{margin:5px 0}.exercise-card .cue{background:#f8fafc;border-radius:12px;padding:10px;margin-top:8px;font-size:13px}
+    .timer{font-variant-numeric:tabular-nums;font-size:40px;font-weight:850;letter-spacing:1px;text-align:center;margin:8px 0}.timer-actions{display:flex;gap:8px;justify-content:center}.progress-wrap{display:flex;gap:10px;align-items:center}.progress-wrap .scorebar{flex:1}
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(15px);border-top:1px solid var(--line);padding:7px max(10px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}.nav-inner{max-width:760px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.nav-btn{border:0;background:transparent;border-radius:12px;padding:7px 2px;color:#667085;font-size:11px}.nav-btn b{display:block;font-size:20px;line-height:1.1;margin-bottom:3px}.nav-btn.active{background:#eef2f6;color:#101828;font-weight:750}
+    .toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);opacity:0;background:#111827;color:white;padding:10px 14px;border-radius:12px;font-size:13px;transition:.25s;z-index:50;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .empty{text-align:center;color:var(--muted);padding:28px 10px}.danger-note{border-left:4px solid var(--bad);background:#fff4f3;padding:12px;border-radius:12px;font-size:13px}.warn-note{border-left:4px solid var(--warn);background:#fffaeb;padding:12px;border-radius:12px;font-size:13px}
+    canvas{width:100%;height:180px;background:#fff;border-radius:12px}
+    .plan-select{width:100%;border:1px solid #d0d5dd;border-radius:12px;padding:12px;background:#fff;color:var(--text);font-weight:700}
+    .plan-note{margin-top:8px;padding:10px 12px;border-radius:12px;background:#f8fafc;color:var(--muted);font-size:12px}
+    .week-plan{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-top:12px}.week-progress{display:flex;align-items:center;gap:10px}.week-progress .scorebar{flex:1}
+    .assignment-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+    .rest-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 11px;border-radius:13px;background:#f8fafc;border:1px solid #eaecf0}.rest-copy{min-width:0}.rest-badge{display:inline-block;border-radius:999px;background:#eef4ff;color:#3538cd;padding:4px 8px;font-size:11px;font-weight:800}.rest-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;flex:0 0 auto}.rest-guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.rest-guide>div{border:1px solid var(--line);border-radius:12px;padding:10px;background:#f8fafc}.rest-guide b{display:block;margin-bottom:2px}.toggle-line{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:#fff;font-weight:650}.toggle-line input{width:18px;height:18px;margin-top:1px}.timer-context{text-align:center;color:var(--muted);font-size:13px;min-height:20px}.timer-actions{flex-wrap:wrap}.timer-actions .btn{min-width:70px}
+
+    .health-card{border:1px solid #bfd4ff;background:linear-gradient(180deg,#f7faff,#fff)}
+    .health-status{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:13px;background:#f8fafc;border:1px solid var(--line);margin:10px 0}
+    .health-dot{width:11px;height:11px;border-radius:50%;background:#98a2b3;margin-top:5px;flex:0 0 auto}.health-dot.good{background:var(--good)}.health-dot.warn{background:#f79009}.health-dot.bad{background:var(--bad)}
+    .health-workout{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:9px;background:#fff}.health-workout .metrics{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.metric-chip{font-size:11px;border-radius:999px;background:#f2f4f7;color:#344054;padding:5px 8px}
+    .health-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.health-summary .stat{padding:11px}.health-summary .stat b{font-size:18px}
+    .source-badge{display:inline-block;font-size:10px;border-radius:999px;background:#ecfdf3;color:#027a48;padding:4px 7px;margin-left:5px}
+    .privacy-note{font-size:12px;color:var(--muted);margin-top:10px}.native-only{border-left:4px solid #2563eb;background:#eff6ff;padding:11px 12px;border-radius:12px;font-size:13px}
+    @media(max-width:520px){.grid.three{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.hero h1{font-size:22px}.card{padding:14px}.rest-row{flex-direction:column}.rest-actions{justify-content:flex-start}.rest-guide{grid-template-columns:1fr}.timer-actions .btn{min-width:64px}.health-summary{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="top">
+      <div><div class="title">맨몸 코치</div><div class="subtitle" id="todayText"></div></div>
+      <button class="pill" id="installBtn" hidden>홈 화면 설치</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="today" class="view active"></section>
+    <section id="week" class="view"></section>
+    <section id="library" class="view"></section>
+    <section id="test" class="view"></section>
+    <section id="log" class="view"></section>
+  </main>
+</div>
+
+<nav class="bottom-nav" aria-label="하단 메뉴">
+  <div class="nav-inner">
+    <button class="nav-btn active" data-view="today"><b>●</b>오늘</button>
+    <button class="nav-btn" data-view="week"><b>▦</b>주간</button>
+    <button class="nav-btn" data-view="library"><b>≡</b>동작</button>
+    <button class="nav-btn" data-view="test"><b>◎</b>평가</button>
+    <button class="nav-btn" data-view="log"><b>✎</b>일지</button>
+  </div>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const DAYS=['일','월','화','수','목','금','토'];
+const dayKey=['sun','mon','tue','wed','thu','fri','sat'];
+const today=new Date();
+const dateKey=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
+const storage={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
+
+const nativeHealthAvailable=()=>!!(window.AndroidHealth&&typeof window.AndroidHealth.requestStatus==='function');
+function getHealthWorkouts(){return storage.get('healthWorkouts',[])}
+function setHealthWorkouts(items){storage.set('healthWorkouts',items)}
+function getHealthState(){return storage.get('healthConnectState',{status:'unknown',permissionsGranted:false,message:'상태를 확인하지 않았습니다.',lastSync:null})}
+function setHealthState(v){storage.set('healthConnectState',v)}
+function requestHealthStatus(){if(nativeHealthAvailable())window.AndroidHealth.requestStatus();else{setHealthState({status:'web',permissionsGranted:false,message:'Health Connect 연동은 Android APK 버전에서만 사용할 수 있습니다.',lastSync:getHealthState().lastSync});renderLog()}}
+function requestHealthPermissions(){if(!nativeHealthAvailable()){toast('Android 앱 버전에서만 권한을 요청할 수 있습니다');return}window.AndroidHealth.requestPermissions()}
+function syncHealthWorkouts(){if(!nativeHealthAvailable()){toast('Android 앱 버전에서만 동기화할 수 있습니다');return}const state=getHealthState();if(!state.permissionsGranted){toast('먼저 Health Connect 권한을 허용하십시오');return}toast('최근 30일 기록을 읽는 중입니다');window.AndroidHealth.syncWorkouts(30)}
+function openHealthSettings(){if(nativeHealthAvailable())window.AndroidHealth.openHealthConnectSettings();else toast('Android 앱 버전에서만 사용할 수 있습니다')}
+window.onHealthStatus=function(payload){try{const data=typeof payload==='string'?JSON.parse(payload):payload;setHealthState({...getHealthState(),...data});renderLog()}catch(e){toast('Health Connect 상태 처리 오류')}};
+window.onHealthWorkouts=function(payload){try{const data=typeof payload==='string'?JSON.parse(payload):payload;setHealthWorkouts(data.workouts||[]);setHealthState({...getHealthState(),status:'available',permissionsGranted:true,message:`최근 30일 ${data.workouts?.length||0}개 기록을 가져왔습니다.`,lastSync:new Date().toISOString()});renderLog();toast('달리기·수영 기록을 동기화했습니다')}catch(e){toast('운동 기록 처리 오류')}};
+window.onHealthError=function(payload){try{const data=typeof payload==='string'?JSON.parse(payload):payload;setHealthState({...getHealthState(),message:data.message||'Health Connect 오류가 발생했습니다.'});renderLog();toast(data.message||'Health Connect 오류')}catch(e){toast('Health Connect 오류')}};
+window.onNativeMessage=function(payload){try{const data=typeof payload==='string'?JSON.parse(payload):payload;toast(data.message||'완료되었습니다')}catch(e){toast('완료되었습니다')}};
+function healthStatusView(){const s=getHealthState(),native=nativeHealthAvailable();let cls=s.permissionsGranted?'good':(s.status==='unavailable'?'bad':'warn');let title=s.permissionsGranted?'연결됨':(s.status==='unavailable'?'사용 불가':native?'권한 필요':'Android 앱 필요');const sync=s.lastSync?new Date(s.lastSync).toLocaleString('ko-KR'):'아직 없음';return `<div class="health-status"><i class="health-dot ${cls}"></i><div><div class="strong">${title}</div><div class="small muted">${escapeHtml(s.message||'')}</div><div class="small muted">마지막 동기화: ${sync}</div></div></div>`}
+function healthSummary(items){const runs=items.filter(x=>x.category==='running'),swims=items.filter(x=>x.category==='swimming');const sum=(arr,key)=>arr.reduce((a,x)=>a+(Number(x[key])||0),0);const runKm=sum(runs,'distanceKm'),swimKm=sum(swims,'distanceKm');return `<div class="health-summary"><div class="stat"><b>${items.length}</b><span>최근 30일 세션</span></div><div class="stat"><b>${runKm.toFixed(1)} km</b><span>달리기</span></div><div class="stat"><b>${Math.round(swimKm*1000)} m</b><span>수영</span></div></div>`}
+function workoutMetricChips(w){const chips=[];if(w.distanceKm!=null)chips.push(w.category==='swimming'?`${Math.round(w.distanceKm*1000)}m`:`${Number(w.distanceKm).toFixed(2)}km`);if(w.activeMinutes!=null)chips.push(`${Math.round(w.activeMinutes)}분`);if(w.avgHeartRate)chips.push(`평균 ${Math.round(w.avgHeartRate)}bpm`);if(w.maxHeartRate)chips.push(`최대 ${Math.round(w.maxHeartRate)}bpm`);if(w.caloriesKcal)chips.push(`${Math.round(w.caloriesKcal)}kcal`);if(w.category==='running'&&w.paceMinPerKm)chips.push(`${formatPace(w.paceMinPerKm)}/km`);if(w.category==='swimming'&&w.paceMinPer100m)chips.push(`${formatPace(w.paceMinPer100m)}/100m`);return chips.map(x=>`<span class="metric-chip">${x}</span>`).join('')}
+function formatPace(value){if(!value||!isFinite(value))return '-';const m=Math.floor(value),s=Math.round((value-m)*60);return `${m}:${String(s===60?0:s).padStart(2,'0')}`}
+function healthWorkoutList(items){if(!items.length)return '<div class="empty">동기화된 달리기·수영 기록이 없습니다.</div>';const existing=new Set(getLogs().map(x=>x.healthConnectId).filter(Boolean));return items.slice(0,20).map(w=>`<div class="health-workout"><div class="row between"><div><div class="strong">${w.category==='running'?'달리기':'수영'} · ${escapeHtml(w.localStart||w.date)}</div><div class="small muted">${escapeHtml(w.sourceLabel||w.sourcePackage||'Health Connect')}<span class="source-badge">Health Connect</span></div></div><button class="btn ${existing.has(w.id)?'secondary':'outline'} smallbtn" ${existing.has(w.id)?'disabled':''} onclick="addHealthWorkoutToLog('${escapeAttr(w.id)}')">${existing.has(w.id)?'일지 추가됨':'일지에 추가'}</button></div><div class="metrics">${workoutMetricChips(w)}</div></div>`).join('')}
+function addHealthWorkoutToLog(id){const w=getHealthWorkouts().find(x=>x.id===id);if(!w)return;const logs=getLogs();if(logs.some(x=>x.healthConnectId===id)){toast('이미 일지에 추가된 기록입니다');return}const distance=w.category==='swimming'?`${Math.round((w.distanceKm||0)*1000)}m`:`${Number(w.distanceKm||0).toFixed(2)}km`;const pace=w.category==='running'&&w.paceMinPerKm?`평균 페이스 ${formatPace(w.paceMinPerKm)}/km`:w.category==='swimming'&&w.paceMinPer100m?`평균 페이스 ${formatPace(w.paceMinPer100m)}/100m`:'';const heart=w.avgHeartRate?`평균 심박 ${Math.round(w.avgHeartRate)}bpm${w.maxHeartRate?`, 최대 ${Math.round(w.maxHeartRate)}bpm`:''}`:'';logs.push({date:w.date,type:w.category==='running'?'달리기 · Health Connect':'수영 · Health Connect',warmupStatus:'미기록',minutes:String(Math.round(w.activeMinutes||w.elapsedMinutes||0)),rpe:'',pain:'0',dizzy:'없음',notes:[distance,pace,heart,w.caloriesKcal?`${Math.round(w.caloriesKcal)}kcal`:'',`출처: ${w.sourceLabel||w.sourcePackage}`].filter(Boolean).join(' · '),healthConnectId:w.id,healthSource:w.sourcePackage});storage.set('workoutLogs',logs);renderLog();toast('Health Connect 기록을 일지에 추가했습니다')}
+function escapeAttr(s=''){return String(s).replace(/['"&<>]/g,c=>({"'":'&#39;','"':'&quot;','&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+
+const exercises={
+  pullup:{name:'엄격한 풀업',area:'수직 당기기 · 광배근·상완·견갑 안정',setup:['봉을 어깨너비보다 약간 넓게 오버그립으로 잡는다.','팔꿈치를 펴고 매달리되 어깨 앞쪽이 찝히지 않게 한다.','다리를 모으고 복부와 엉덩이에 가볍게 힘을 준다.'],steps:['겨드랑이를 아래로 누르는 느낌으로 움직임을 시작한다.','팔꿈치를 아래·옆구리 방향으로 끌어당긴다.','턱 아래가 봉 높이를 넘으면 1초 정지한다.','2~3초 동안 내려와 팔꿈치를 다시 편다.'],errors:['발차기·반동','턱만 앞으로 내밀기','한쪽 어깨가 먼저 올라가기','마지막 하강에서 떨어지기'],stop:'목 조임, 어깨 앞쪽의 날카로운 통증, 저림 또는 어지럼이 있으면 중단.'},
+  assistPullup:{name:'발 보조 풀업',area:'수직 당기기 회귀 동작',setup:['낮은 봉 아래에 앉거나 높은 봉 아래에 단단한 발판을 둔다.','팔이 거의 펴진 상태에서 발이 바닥 또는 발판에 닿게 한다.'],steps:['상체 힘으로 먼저 당긴다.','막히는 구간에서만 발로 최소한 보조한다.','턱이 봉을 넘으면 정지하고 상체가 하강을 통제한다.'],errors:['발로 점프하기','내려올 때 힘을 풀기','세트마다 보조량이 크게 달라지기'],stop:'보조해도 자세가 무너지거나 관절 통증이 생기면 종료.'},
+  row:{name:'다리 편 인버티드 로우',area:'수평 당기기 · 등·후면어깨',setup:['튼튼한 낮은 봉 아래에서 뒤꿈치를 바닥에 댄다.','머리·등·골반·무릎·발목을 일직선으로 만든다.','손은 어깨너비보다 약간 넓게 잡는다.'],steps:['가슴뼈를 봉으로 끌어당긴다.','팔꿈치는 몸통에서 약 30~45도로 움직인다.','가슴 중앙이 봉에 가까워지면 1초 정지한다.','몸통을 판자처럼 유지하며 내려온다.'],errors:['골반이 먼저 떨어짐','머리만 봉에 닿음','어깨를 귀 쪽으로 으쓱함','불안정한 식탁 사용'],stop:'봉·링의 고정이 불확실하거나 어깨·팔꿈치 통증이 생기면 즉시 중단.'},
+  pushup:{name:'바닥 푸시업',area:'수평 밀기 · 가슴·삼두·전면어깨',setup:['손은 어깨너비 또는 손바닥 하나 정도 넓게 둔다.','귀·어깨·골반·무릎·발목을 일직선으로 만든다.','복부와 엉덩이에 힘을 준다.'],steps:['몸통과 골반을 동시에 내린다.','팔꿈치는 몸통에서 약 30~45도 벌어진다.','가슴이 바닥 가까이에 오면 멈춘다.','바닥을 밀어 몸 전체를 동시에 올린다.'],errors:['허리 처짐','엉덩이 들림','팔꿈치 90도 벌어짐','머리만 내리기'],stop:'손목·어깨의 찌르는 통증, 저림 또는 목 증상 발생 시 중단.'},
+  pike:{name:'파이크 푸시업',area:'수직 밀기 · 어깨·삼두',setup:['손은 어깨너비 전후, 엉덩이는 높게 들어 역 V자를 만든다.','햄스트링이 당기면 무릎을 약간 굽힌다.','머리는 팔 사이, 갈비뼈는 들리지 않게 한다.'],steps:['머리를 손보다 약간 앞쪽 바닥으로 내린다.','양손과 머리가 삼각형을 이루게 한다.','전완을 가능한 수직에 가깝게 유지한다.','바닥을 밀며 머리를 다시 팔 사이로 보낸다.'],errors:['엉덩이가 낮아져 일반 푸시업이 됨','정수리로 바닥 찍기','목을 젖힘','팔꿈치가 과도하게 벌어짐'],stop:'목 조임·어지럼 또는 어깨 앞쪽 찝힘이 있으면 인클라인 변형으로 낮춘다.'},
+  declinePushup:{name:'발 올린 푸시업',area:'수평 밀기 고급 변형',setup:['발을 15~30cm의 단단한 발판에 올린다.','손과 몸통 정렬은 바닥 푸시업과 같다.'],steps:['가슴을 손 사이로 내린다.','팔꿈치 30~45도를 유지한다.','허리가 처지지 않게 몸 전체를 밀어 올린다.'],errors:['발판이 지나치게 높음','허리 꺾임','짧은 가동범위'],stop:'6회 미만이거나 자세가 흐트러지면 일반 푸시업으로 회귀.'},
+  reverseLunge:{name:'리버스 런지',area:'편측 하체 · 대퇴·둔근·균형',setup:['발을 골반너비로 두고 두 철길 위에 선다고 생각한다.','몸통은 곧게 세우되 과도하게 뒤로 젖히지 않는다.'],steps:['한쪽 발을 충분히 뒤로 보낸다.','골반을 아래로 내리며 양 무릎을 굽힌다.','앞 무릎은 두 번째·세 번째 발가락 방향으로 움직인다.','앞발 전체로 바닥을 밀어 일어난다.'],errors:['앞 무릎 안쪽 붕괴','양발이 외줄처럼 놓임','뒤쪽 발로 튕김','몸통 한쪽 기울임'],stop:'무릎·고관절의 날카로운 통증이 있으면 깊이와 보폭을 줄이거나 중단.'},
+  bulgarian:{name:'불가리안 스플릿 스쿼트',area:'편측 하체 근력',setup:['뒤 발을 30~40cm의 단단한 지지대에 올린다.','앞발과 뒤발 사이에 좌우 간격을 둔다.','앞다리에 체중 대부분을 둔다.'],steps:['앞 고관절과 무릎을 함께 굽힌다.','뒤 무릎을 바닥 쪽으로 내린다.','앞 무릎은 발가락 방향을 따른다.','앞발 중족부와 뒤꿈치로 밀어 오른다.'],errors:['지지대가 너무 높음','앞 무릎 안쪽 붕괴','뒤 발로 강하게 밀기','균형 때문에 몸통이 과도하게 흔들림'],stop:'처음 2주는 벽에 손가락을 대도 된다. 무릎 통증 시 리버스 런지로 회귀.'},
+  singleBridge:{name:'한발 힙 브리지',area:'후면사슬 · 둔근·햄스트링',setup:['등을 대고 누워 한 발을 엉덩이에서 20~30cm 떨어뜨린다.','반대 무릎은 가슴 방향으로 들어 골반 회전을 줄인다.'],steps:['숨을 내쉬며 배에 힘을 준다.','지지발 전체로 바닥을 누른다.','어깨·골반·무릎이 일직선이 될 때까지 골반을 든다.','위에서 1초 수축 후 천천히 내린다.'],errors:['허리 과신전','골반 한쪽 떨어짐','발가락만 누름','햄스트링 경련을 참음'],stop:'경련 시 발을 조금 당기고 양발 브리지로 낮춘다.'},
+  hamWalk:{name:'햄스트링 워크아웃',area:'후면사슬 고급 변형',setup:['양발 힙 브리지에서 골반을 들어 올린다.','무릎은 약 90도, 뒤꿈치를 바닥에 둔다.'],steps:['오른쪽·왼쪽 뒤꿈치를 번갈아 반 발 길이씩 앞으로 옮긴다.','골반 높이가 유지되는 범위까지만 2~4걸음 나간다.','같은 방식으로 시작 위치까지 돌아온다.','한 번 나갔다 돌아오면 1회다.'],errors:['골반 떨어짐','큰 걸음','허리 꺾기','완전한 무릎 폄을 목표로 함'],stop:'햄스트링 경련이나 허리 통증이 있으면 즉시 종료.'},
+  hollow:{name:'풀 홀로우 보디 홀드',area:'전면 코어 · 골반·갈비뼈 조절',setup:['등을 대고 누워 숨을 내쉬며 허리 아래를 바닥에 붙인다.','머리와 견갑 윗부분을 들고 다리와 팔을 뻗는다.'],steps:['허리 접촉을 유지한다.','턱을 과도하게 당기거나 들지 않는다.','짧게 계속 호흡한다.','허리가 뜨기 전에 종료한다.'],errors:['다리를 낮추느라 허리가 뜸','숨 참기','목만 과도하게 굽힘'],stop:'허리 통증이 생기면 팔을 몸통 옆으로 두거나 다리를 높인다.'},
+  sidePlank:{name:'사이드 플랭크',area:'측면 코어 · 골반 안정',setup:['아래 팔꿈치를 어깨 바로 아래 둔다.','다리를 펴고 머리와 척추를 일직선으로 둔다.'],steps:['복부와 엉덩이에 힘을 주어 골반을 든다.','귀·어깨·골반·무릎·발목을 일직선으로 만든다.','위쪽 어깨와 골반이 앞으로 돌아가지 않게 한다.','평소처럼 호흡한다.'],errors:['골반 처짐','어깨 으쓱','몸통 회전','숨 참기'],stop:'아래쪽 어깨가 불편하면 아래 무릎을 바닥에 대는 변형 사용.'},
+  calf:{name:'종아리 올리기',area:'하퇴 · 발목 안정',setup:['벽 가까이 서서 발을 골반너비로 둔다.','엄지 밑·새끼 밑·뒤꿈치의 삼각 지지를 만든다.'],steps:['양 뒤꿈치를 같은 높이로 든다.','최고점에서 1초 멈춘다.','2초에 걸쳐 내린다.'],errors:['발목이 바깥으로 굴러감','반동','무릎을 뒤로 잠금'],stop:'아킬레스건이나 발바닥의 날카로운 통증 시 중단.'},
+  balance:{name:'눈 감고 한발 서기',area:'균형·고유감각',setup:['벽이나 고정 가구 바로 옆에 선다.','지지발의 세 점을 바닥에 두고 무릎을 약간 굽힌다.'],steps:['반대 발을 몇 cm 든다.','눈을 뜨고 5초 안정 후 감는다.','발이 크게 이동하거나 벽을 잡으면 종료한다.'],errors:['발가락 과도하게 움켜쥠','골반을 옆으로 밀어 고정','기립 직후 바로 시행'],stop:'어지럼이 느껴지는 날은 눈을 뜬 상태로만 시행.'},
+  wallSlide:{name:'벽 마주보기 월슬라이드',area:'어깨 가동성·견갑 상방회전',setup:['벽을 마주 보고 15~20cm 떨어져 선다.','전완과 손날을 벽에 대고 갈비뼈를 내린다.'],steps:['전완으로 벽을 가볍게 민다.','팔을 위로 미끄러뜨린다.','허리 꺾임이나 어깨 찝힘 전 멈춘다.','전완 압력을 유지하며 내려온다.'],errors:['허리 꺾기','견갑을 뒤로 꽉 모으기','목 앞으로 내밀기'],stop:'어깨 앞쪽 통증이 있으면 범위를 줄인다.'},
+  scapPushup:{name:'견갑 푸시업',area:'견갑 조절 · 전거근',setup:['푸시업 최고점에서 팔꿈치를 편다.','몸통과 골반을 일직선으로 만든다.'],steps:['팔꿈치를 굽히지 않고 가슴을 조금 내린다.','어깨뼈가 가까워지게 둔다.','바닥을 밀어 어깨뼈를 양옆으로 벌린다.'],errors:['작은 푸시업처럼 팔꿈치 굽힘','허리 처짐','어깨 으쓱'],stop:'손목이 불편하면 벽 또는 높은 지지대에서 시행.'},
+  deadbug:{name:'데드버그',area:'코어 조절·대각선 협응',setup:['등을 대고 누워 고관절과 무릎을 90도로 굽힌다.','팔은 천장, 허리 아래는 바닥에 붙인다.'],steps:['오른 다리와 왼팔을 동시에 뻗는다.','허리가 뜨기 직전에 멈춘다.','시작 자세로 돌아와 반대쪽을 한다.'],errors:['손발을 바닥에 닿게 하려다 허리 뜸','빠른 교차','숨 참기'],stop:'허리 통증 시 뻗는 범위를 줄인다.'},
+  deepSquat:{name:'딥스쿼트 홀드',area:'발목·고관절 가동성',setup:['발을 어깨너비 전후로 두고 발끝은 10~30도 바깥으로 둔다.'],steps:['무릎과 고관절을 함께 굽혀 내려간다.','뒤꿈치를 붙이고 가능한 깊이에서 멈춘다.','편안하게 호흡하며 유지한다.','지지물을 잡고 천천히 일어난다.'],errors:['뒤꿈치 들림','무릎 안쪽 붕괴','통증을 참으며 깊이 강제'],stop:'무릎·고관절 통증이나 기립 시 어지럼이 있으면 중단.'},
+  hip9090:{name:'90/90 고관절 전환',area:'고관절 내·외회전',setup:['앞·뒤 다리의 무릎을 각각 약 90도로 굽혀 앉는다.','필요하면 양손을 뒤에 짚는다.'],steps:['양 무릎을 동시에 반대 방향으로 넘긴다.','발은 바닥에서 회전하며 따라간다.','반대편 90/90에서 잠시 멈춘 뒤 돌아온다.'],errors:['무릎을 바닥에 억지로 누름','몸통을 무리하게 세움','무릎 관절 통증을 참음'],stop:'무릎 통증 시 범위를 줄이거나 제외.'},
+  ankle:{name:'발목 무릎-벽 운동',area:'발목 배굴 가동성',setup:['벽을 마주 보고 앞발의 발끝을 벽 쪽으로 둔다.','뒤꿈치와 발 아치를 유지한다.'],steps:['무릎을 두 번째·세 번째 발가락 방향으로 벽에 보낸다.','뒤꿈치를 붙인 채 벽을 터치한다.','쉬우면 발을 1cm 뒤로 옮긴다.'],errors:['뒤꿈치 들림','발 전체 바깥 회전','무릎 안쪽 붕괴'],stop:'발목 앞쪽 찝힘이나 통증 시 거리를 줄인다.'},
+  march:{name:'제자리 걷기',area:'준비운동 · 체온·심박수 점진 상승',setup:['주변에 걸려 넘어질 물건이 없는 평평한 곳에 선다.','몸통은 세우고 발은 골반너비로 둔다.'],steps:['발을 번갈아 가볍게 들어 제자리에서 걷는다.','팔도 자연스럽게 앞뒤로 움직인다.','처음 20초는 아주 천천히 시작해 호흡이 약간 빨라질 정도까지만 속도를 올린다.'],errors:['처음부터 빠르게 뛰기','무릎을 과도하게 높이 들기','숨을 참기'],stop:'어지럼이나 기립 직후 아득함이 있으면 벽을 짚고 천천히 하거나 앉아서 발목 움직임으로 대체.'},
+  warmSquat:{name:'느린 맨몸 스쿼트',area:'준비운동 · 하체 관절·동작 예행',setup:['발을 어깨너비 전후로 두고 발끝은 약간 바깥으로 둔다.','발바닥 전체를 바닥에 유지한다.'],steps:['2초 동안 천천히 내려간다.','무릎은 발가락 방향을 따라 움직인다.','편안한 깊이까지만 내려갔다가 2초 동안 올라온다.'],errors:['반동으로 빠르게 반복','무릎 안쪽 붕괴','통증을 참으며 깊이 강제'],stop:'무릎·고관절 통증 또는 일어날 때 어지럼이 있으면 의자 스쿼트로 낮추거나 중단.'},
+  deadHang:{name:'편안한 데드행',area:'준비운동 · 어깨·그립·수직 당기기 준비',setup:['안전하게 고정된 봉을 어깨너비 전후로 잡는다.','발이 바닥에서 떨어져도 즉시 내려올 수 있는 높이를 사용한다.'],steps:['팔을 펴고 10~15초 편안하게 매달린다.','어깨를 귀 쪽으로 억지로 끌어올리거나 아래로 과도하게 누르지 않는다.','복부에 가볍게 힘을 주어 흔들림을 줄인다.'],errors:['통증을 참으며 완전히 축 늘어짐','발차기·흔들기','봉의 고정 확인 생략'],stop:'어깨 앞쪽 찝힘, 손 저림, 목 조임이 있으면 즉시 내려와 생략.'},
+  scapPullup:{name:'견갑 풀업',area:'준비운동 · 견갑 조절·풀업 예행',setup:['풀업 봉에 매달려 팔꿈치를 편다.','몸통과 다리의 흔들림을 최소화한다.'],steps:['팔꿈치를 굽히지 않은 채 어깨뼈를 아래쪽으로 움직여 몸을 몇 cm 들어 올린다.','가슴을 약간 들어 올리고 1초 멈춘다.','천천히 원위치한다.'],errors:['팔꿈치를 굽혀 작은 풀업이 됨','반동 사용','어깨를 과도하게 뒤로 젖힘'],stop:'어깨 통증이 있거나 동작이 불분명하면 발 보조 풀업 3회로 대체.'},
+  armCircle:{name:'어깨 돌리기·팔 휘두르기',area:'준비운동 · 수영 전 어깨 가동',setup:['발을 골반너비로 두고 목과 어깨에 힘을 뺀다.','주변에 팔이 부딪힐 물건이 없는지 확인한다.'],steps:['작은 원부터 시작해 팔 원을 점차 크게 만든다.','앞 방향과 뒤 방향을 각각 20~30초 실시한다.','마지막에는 팔을 앞뒤로 편안하게 휘두른다.'],errors:['처음부터 큰 원으로 빠르게 돌림','허리를 과도하게 비틀기','어깨 통증을 참음'],stop:'어깨 앞쪽 찝힘이나 목 조임이 있으면 원의 크기를 줄이거나 월슬라이드만 시행.'},
+  briskWalk:{name:'빠르게 걷기',area:'준비운동 · 달리기 전 체온 상승',setup:['평평한 길에서 편안한 보폭으로 시작한다.','처음에는 대화가 가능한 속도를 유지한다.'],steps:['첫 1분은 평소 걷기 속도로 걷는다.','이후 2~4분 동안 팔을 자연스럽게 흔들며 속도를 조금 높인다.','호흡이 약간 빨라지되 숨이 차지 않는 수준에서 마친다.'],errors:['처음부터 달리기 속도로 걷기','보폭을 과도하게 늘리기','언덕에서 시작하기'],stop:'어지럼·가슴통증·비정상적인 숨참이 있으면 운동을 시작하지 않는다.'},
+  easyRun:{name:'첫 구간 매우 느리게 달리기',area:'준비운동 · 달리기 동작 특이적 예행',setup:['빠르게 걷기를 마친 뒤 가장 편안한 달리기 자세를 취한다.'],steps:['첫 5분은 평소 10km 속도보다 명확히 느리게 달린다.','보폭을 짧게 하고 착지를 조용하게 유지한다.','5분이 지난 뒤 몸 상태가 좋을 때만 정상 페이스로 올린다.'],errors:['시작부터 목표 페이스','첫 5분에 오르막·질주','호흡이 안정되기 전에 속도 상승'],stop:'다리 힘 빠짐, 어지럼, 흉통 또는 비정상적 호흡곤란이 있으면 걷기로 전환 후 중단.'},
+  easySwim:{name:'첫 구간 느린 수영',area:'준비운동 · 수영 동작 특이적 예행',setup:['입수 전 어깨 돌리기를 마치고 편안한 영법을 선택한다.'],steps:['첫 5분은 평소보다 느리고 긴 호흡으로 수영한다.','스트로크 길이와 어깨의 편안함을 우선한다.','몸이 따뜻해진 뒤에만 정상 강도로 전환한다.'],errors:['첫 왕복부터 전력','호흡을 오래 참음','어깨 피로를 무시함'],stop:'어깨 통증·어지럼·호흡 불편이 있으면 즉시 벽을 잡고 휴식 후 종료.'},
+  optionalWarmup:{name:'선택 활동 맞춤 준비',area:'준비운동 · 선택 운동 전 조건별 적용',setup:['오늘 선택한 활동이 달리기·걷기인지, 수영인지 먼저 정한다.','완전 휴식을 선택했다면 이 항목은 생략한다.'],steps:['달리기·걷기라면 빠르게 걷기 3~5분을 실시한다.','수영이라면 어깨 돌리기 1~2분 후 첫 5분을 느리게 한다.','그 밖의 활동은 해당 동작을 낮은 강도로 5분 예행한다.'],errors:['활동을 정하지 않고 무작정 시작','첫 구간부터 높은 강도','휴식일에도 억지로 수행'],stop:'피로가 크거나 통증·어지럼이 있으면 완전 휴식을 선택.'},
+  recoveryWarmup:{name:'회복일 가벼운 몸풀기',area:'준비운동 · 능동적 회복 전 순환 촉진',setup:['서거나 의자에 앉아 편안한 자세를 취한다.'],steps:['제자리 걷기 또는 발목 펌프를 60초 실시한다.','어깨를 작게 앞뒤로 돌리고 고개는 중립으로 둔다.','호흡이 편안한 상태에서 본 회복 루틴으로 넘어간다.'],errors:['회복일 준비를 고강도로 수행','통증 부위를 강하게 늘림','빠른 체위 변화'],stop:'어지럼이 있으면 앉아서 발목 펌프와 호흡만 실시.'},
+  straightBridge:{name:'스트레이트 브리지',area:'후면사슬·어깨 신전 · 리버스 플랭크',setup:['다리를 펴고 앉아 손을 골반보다 뒤에 둔다.','현재는 골반 뒤 10cm 이상이어도 된다.','손가락은 발 방향 또는 약간 바깥쪽을 향한다.'],steps:['손바닥과 뒤꿈치로 바닥을 누른다.','엉덩이를 수축하며 골반을 든다.','어깨·골반·발목이 가능한 긴 직선을 이루게 한다.','목을 과도하게 젖히지 않고 천천히 내린다.'],errors:['손을 골반 옆에 억지로 고정','허리만 과신전','머리를 완전히 뒤로 떨어뜨림'],stop:'앞어깨·손목 통증 시 무릎을 굽힌 리버스 테이블탑으로 회귀.'}
+};
+
+const restProfiles={
+ heavy:{sec:180,label:'3분',kind:'고난도 저반복',note:'힘과 자세를 보존하는 것이 우선입니다.'},
+ standard:{sec:90,label:'90초',kind:'주운동',note:'6~12회 작업세트의 기본 휴식입니다.'},
+ accessory:{sec:60,label:'60초',kind:'보조·코어',note:'호흡을 정리하고 자세를 유지하는 데 충분합니다.'},
+ singles:{sec:75,label:'75초',kind:'풀업 싱글',note:'1회 수행 간 60~75초가 목표이며 앱은 75초를 기본으로 사용합니다.'},
+ assisted:{sec:90,label:'90초',kind:'보조 풀업',note:'기본은 90초입니다. 첫 반복부터 어렵거나 하강 제어가 무너지면 3분으로 늘리십시오.',altSec:180,altLabel:'3분'},
+ hardStandard:{sec:90,label:'90초',kind:'고난도 주운동',note:'RIR 2 정도면 90초. 목표 하한 반복이 한계에 가깝거나 자세가 흔들리면 3분.',altSec:180,altLabel:'3분'},
+ none:{sec:0,label:'세트 휴식 없음',kind:'지속 운동',note:'세트 타이머보다 페이스와 호흡을 기준으로 합니다.'},
+ recovery:{sec:60,label:'필요 시 60초',kind:'회복·가동성',note:'숨이 차지 않으면 바로 다음 동작으로 이동해도 됩니다.'}
+};
+const pairedSides=new Set(['reverseLunge','singleBridge','sidePlank','balance','bulgarian','deadbug','hip9090','ankle']);
+const routine={
+ mon:{title:'근력 A · 당기기 우선',type:'근력',items:[
+  ['pullup','엄격한 풀업','총 8회 · 2-2-1-1-1-1','6세트','heavy'],['row','다리 편 인버티드 로우','3세트 × 5~7회','3세트','standard'],['reverseLunge','리버스 런지','좌우 3세트 × 7~8회','3세트','standard'],['singleBridge','한발 힙 브리지','좌우 3세트 × 8회','3세트','standard'],['hollow','풀 홀로우 보디','2세트 × 20~25초','2세트','accessory'],['balance','눈 감고 한발 서기','좌우 3세트 × 10~15초','3세트','accessory']]},
+ tue:{title:'편안한 달리기',type:'유산소',items:[['run','10km 편안한 달리기','RPE 3~5 · 종료 후 5분 걷기','1회','none'],['balance','눈 감고 한발 서기','좌우 2세트','2세트','accessory']]},
+ wed:{title:'근력 B · 수직 밀기와 균형',type:'근력',items:[['pike','파이크 푸시업','4세트 × 4~5회','4세트','heavy'],['pushup','바닥 푸시업','3세트 × 10~12회','3세트','standard'],['assistPullup','발 보조 풀업','3세트 × 3~5회','3세트','assisted'],['row','인버티드 로우','2세트 × 6~7회','2세트','standard'],['sidePlank','사이드 플랭크','좌우 2세트 × 20~30초','2세트','accessory'],['calf','종아리 올리기','2세트 × 15~20회','2세트','accessory']]},
+ thu:{title:'수영',type:'유산소',items:[['swim','수영','약 40분 · 대부분 중간 이하 강도','1회','none'],['wallSlide','월슬라이드','8회','1세트','recovery'],['hip9090','90/90 고관절 전환','좌우 8회','1세트','recovery']]},
+ fri:{title:'근력 C · 전신 기술·근력',type:'근력',items:[['pullup','풀업 싱글','60~75초마다 1회 × 8회','8세트','singles'],['bulgarian','불가리안 스플릿 스쿼트','좌우 3세트 × 6회','3세트','hardStandard'],['declinePushup','발 올린 푸시업','3세트 × 6~10회','3세트','hardStandard'],['hamWalk','햄스트링 워크아웃','3세트 × 3~5왕복','3세트','standard'],['hollow','풀 홀로우 보디','2세트 × 25초','2세트','accessory'],['balance','눈 감고 한발 서기','좌우 3세트 × 15초','3세트','accessory']]},
+ sat:{title:'선택 운동',type:'선택',items:[['optional','회복 상태에 따라 하나 선택','가벼운 수영 30~40분 / 달리기 30~45분 / 걷기 60분 / 휴식','1회','none']]},
+ sun:{title:'능동적 회복',type:'회복',items:[['hip9090','90/90 고관절 전환','좌우 8회','1세트','recovery'],['wallSlide','월슬라이드','8회','1세트','recovery'],['deepSquat','딥스쿼트 홀드','30초 × 2','2세트','recovery'],['scapPushup','견갑 푸시업','8회 × 2','2세트','recovery'],['deadbug','데드버그','좌우 6회 × 2','2세트','recovery'],['straightBridge','스트레이트 브리지','5~8회 또는 20초 × 2','2세트','recovery'],['balance','눈 감고 한발 서기','좌우 10~20초 × 3','3세트','recovery']]}
+};
+const warmups={
+ mon:{title:'근력 A 준비운동 · 약 5~7분',items:[['march','제자리 걷기','60초','1회'],['warmSquat','느린 맨몸 스쿼트','10회','1세트'],['scapPushup','견갑 푸시업','8회','1세트'],['wallSlide','벽 마주보기 월슬라이드','8회','1세트'],['deadHang','편안한 데드행','10~15초','1세트'],['scapPullup','견갑 풀업 또는 발 보조 풀업','견갑 풀업 5회 또는 발 보조 풀업 3회','1세트']]},
+ tue:{title:'달리기 준비운동 · 약 8~10분',items:[['briskWalk','빠르게 걷기','3~5분','1회'],['easyRun','첫 구간 매우 느리게 달리기','5분','1회']]},
+ wed:{title:'근력 B 준비운동 · 약 5~7분',items:[['march','제자리 걷기','60초','1회'],['warmSquat','느린 맨몸 스쿼트','10회','1세트'],['scapPushup','견갑 푸시업','8회','1세트'],['wallSlide','벽 마주보기 월슬라이드','8회','1세트'],['pike','쉬운 파이크 푸시업 준비세트','3회 · 본세트보다 엉덩이를 덜 높이거나 손을 높은 지지대에 둠','1세트']]},
+ thu:{title:'수영 준비운동 · 약 6~8분',items:[['armCircle','어깨 돌리기·팔 휘두르기','1~2분','1회'],['wallSlide','벽 마주보기 월슬라이드','8회','1세트'],['easySwim','첫 구간 느린 수영','5분','1회']]},
+ fri:{title:'근력 C 준비운동 · 약 5~7분',items:[['march','제자리 걷기','60초','1회'],['warmSquat','느린 맨몸 스쿼트','10회','1세트'],['scapPushup','견갑 푸시업','8회','1세트'],['wallSlide','벽 마주보기 월슬라이드','8회','1세트'],['deadHang','편안한 데드행','10~15초','1세트'],['scapPullup','견갑 풀업 또는 발 보조 풀업','견갑 풀업 5회 또는 발 보조 풀업 3회','1세트']]},
+ sat:{title:'선택 운동 준비 · 활동을 할 때만',items:[['optionalWarmup','선택 활동 맞춤 준비','달리기·걷기·수영에 맞춰 5분 내외 · 완전 휴식이면 생략','1회']]},
+ sun:{title:'회복 루틴 전 몸풀기 · 약 2분',items:[['recoveryWarmup','회복일 가벼운 몸풀기','제자리 걷기 또는 발목 펌프와 어깨 돌리기','1회']]}
+};
+const routineOrder=['mon','tue','wed','thu','fri','sat','sun'];
+const dailyMini=[['balance','눈 감고 한발 서기','좌우 15초 × 2'],['wallSlide','월슬라이드','8회'],['deepSquat','딥스쿼트 홀드','30초'],['ankle','발목 무릎-벽','좌우 10회'],['deadbug','데드버그','좌우 5회']];
+
+const baseline=[
+ {id:'pushup',name:'바닥 푸시업',result:'20회',score:3,max:4,note:'중급'},
+ {id:'pullup',name:'엄격한 풀업',result:'3회',score:2,max:4,note:'우선 향상'},
+ {id:'row',name:'다리 편 인버티드 로우',result:'9회',score:3,max:4,note:'중급'},
+ {id:'lunge',name:'리버스 런지',result:'좌우 10회',score:2,max:4,note:'편측 근력 강화'},
+ {id:'bridge',name:'한발 힙 브리지',result:'좌우 10회',score:2,max:4,note:'후면사슬 강화'},
+ {id:'hollow',name:'풀 홀로우 보디',result:'30초',score:4,max:4,note:'강점'},
+ {id:'pike',name:'파이크 푸시업',result:'8회',score:2,max:4,note:'수직 밀기 강화'},
+ {id:'mobility',name:'딥스쿼트·벽 어깨굴곡',result:'통과',score:3,max:4,note:'양호'},
+ {id:'balance',name:'눈 뜨고 한발 서기',result:'30초',score:1,max:4,note:'눈 감고 단계 미평가'}
+];
+const testCriteria={
+ pushup:['벽/인클라인 5회 미만 또는 통증','인클라인 10회 이상·바닥 0~4회','바닥 5~14회','바닥 15~29회','바닥 30회 이상 또는 발 올린 8회'],
+ pullup:['매달리기 10초 미만 또는 통증','매달리기 30초·견갑 풀업 5회','엄격한 풀업 1~4회','엄격한 풀업 5~9회','엄격한 풀업 10회 이상'],
+ row:['높은 로우 5회 미만 또는 통증','높은 로우 10회','무릎 굽힌 로우 8회','다리 편 로우 8회','다리 편 12회 또는 발 높인 8회'],
+ lunge:['의자 스쿼트 10회 미만 또는 통증','맨몸 스쿼트 20회','리버스 런지 좌우 10회','45cm 의자 한발 일어나기 좌우 5회','피스톨 스쿼트 좌우 5회'],
+ bridge:['양발 힙 브리지 10회 미만 또는 통증','양발 힙 브리지 20회','한발 힙 브리지 좌우 10회','좌우 20회·골반 수평','한발 15회와 햄스트링 워크아웃 10회'],
+ hollow:['데드버그 좌우 5회 불가 또는 통증','데드버그 좌우 10회','플랭크 45초','턱 홀로우 30초 또는 니레이즈 8회','풀 홀로우 30초 또는 레그레이즈 8회'],
+ pike:['월슬라이드 통증 또는 뚜렷한 제한','파이크 30초·견갑 푸시업 5회','파이크 푸시업 8회','발 올린 파이크 8회 또는 벽 물구나무 30초','벽 핸드스탠드 푸시업 3회 이상'],
+ mobility:['통증','지지물 딥스쿼트 30초·어깨 제한 큼','딥스쿼트 60초·팔 벽 미접촉','딥스쿼트와 벽 어깨굴곡 통과','두 검사와 스트레이트 브리지 30초'],
+ balance:['눈 뜨고 10초 미만','눈 뜨고 30초','눈 감고 10초','눈 감고 20초','눈 감고 30초와 다방향 터치']
+};
+
+function dateFromKey(key){const [y,m,d]=key.split('-').map(Number);return new Date(y,m-1,d)}
+function addDays(d,n){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()+n);return x}
+function mondayStart(d=new Date()){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+function currentDay(){return dayKey[new Date().getDay()]}
+function todayLabel(){const d=new Date();return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 ${DAYS[d.getDay()]}요일`}
+function formatMonthDay(key){const d=dateFromKey(key);return `${d.getMonth()+1}월 ${d.getDate()}일`}
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
+function routineState(){return storage.get('routineState',{})}
+function saveRoutineState(v){storage.set('routineState',v)}
+function getPlanSelections(){return storage.get('planSelections',{})}
+function recommendedPlanId(key){return dayKey[dateFromKey(key).getDay()]}
+function selectedPlanId(key){const s=getPlanSelections(),id=s[key];return routine[id]?id:recommendedPlanId(key)}
+function planOptions(selected){return routineOrder.map(id=>`<option value="${id}" ${id===selected?'selected':''}>${routine[id].title}</option>`).join('')}
+function assignRoutine(key,id){if(!routine[id])return;const s=getPlanSelections();s[key]=id;storage.set('planSelections',s);renderToday();renderWeek();toast(`${formatMonthDay(key)} 운동을 '${routine[id].title}'로 지정했습니다`)}
+function clearPlanSelection(key){const s=getPlanSelections();delete s[key];storage.set('planSelections',s);renderToday();renderWeek();toast('기본 추천 세트로 되돌렸습니다')}
+function resetWeekAssignments(){const s=getPlanSelections();for(let i=0;i<7;i++)delete s[dateKey(addDays(mondayStart(),i))];storage.set('planSelections',s);renderToday();renderWeek();toast('이번 주 배정을 기본 추천으로 되돌렸습니다')}
+function planItems(planId,section='main'){return section==='warmup'?(warmups[planId]?.items||[]):routine[planId].items}
+function taskId(key,planId,i,section='main'){return section==='main'?`${key}-${planId}-${i}`:`${key}-${planId}-warmup-${i}`}
+function safeEx(id){return exercises[id]||{name:'유산소/선택 활동',area:'',setup:[],steps:[],errors:[],stop:''}}
+function setCount(txt){const m=txt.match(/(\d+)세트/);return m?Number(m[1]):1}
+function sectionCompletion(key,planId,section,state=routineState()){const items=planItems(planId,section);const done=items.filter((_,i)=>state[taskId(key,planId,i,section)]?.done).length;return {done,total:items.length}}
+function planCompletion(key,planId,state=routineState()){const warm=sectionCompletion(key,planId,'warmup',state),main=sectionCompletion(key,planId,'main',state),done=warm.done+main.done,total=warm.total+main.total;return {done,total,pct:total?Math.round(done/total*100):0,warmDone:warm.done,warmTotal:warm.total,mainDone:main.done,mainTotal:main.total}}
+function warmupStatusFor(key){const planId=selectedPlanId(key),p=planCompletion(key,planId);return !p.warmTotal?'해당 없음':p.warmDone===p.warmTotal?'완료':p.warmDone>0?'일부':'미실시'}
+function typeTagClass(type){return type==='근력'?'good':type==='회복'?'warn':''}
+function getSettings(){return storage.get('appSettings',{autoRest:false})}
+function setAutoRest(v){const x=getSettings();x.autoRest=Boolean(v);storage.set('appSettings',x);toast(x.autoRest?'세트 완료 후 권장 휴식을 자동 시작합니다':'자동 휴식 타이머를 껐습니다')}
+function restProfileFor(it,section='main'){if(section!=='main')return null;return restProfiles[it?.[4]]||restProfiles.standard}
+function restSideNote(exId){return pairedSides.has(exId)?'좌우를 모두 수행한 뒤 휴식합니다. ':''}
+function startRecommendedRest(planId,i){const it=routine[planId]?.items?.[i],p=restProfileFor(it);if(!it||!p?.sec)return;startTimer(p.sec,`${it[1]} · 권장 ${p.label}`)}
+function startAlternateRest(planId,i){const it=routine[planId]?.items?.[i],p=restProfileFor(it);if(!it||!p?.altSec)return;startTimer(p.altSec,`${it[1]} · 연장 ${p.altLabel}`)}
+
+function renderToday(){
+ const key=dateKey(), planId=selectedPlanId(key), recommendedId=recommendedPlanId(key), plan=routine[planId], warm=warmups[planId], state=routineState();
+ const progress=planCompletion(key,planId,state);
+ $('#today').innerHTML=`
+ <div class="hero"><div class="small">오늘 선택한 세트</div><h1>${plan.title}</h1><p>${plan.type} · 준비 ${progress.warmTotal}개 + 본운동 ${progress.mainTotal}개</p><div class="row"><span class="pill" style="background:#fff;color:#111827;border:0">전체 완료 ${progress.done}/${progress.total}</span><span class="pill" style="background:#ffffff18;color:#fff;border-color:#ffffff36">진행 ${progress.pct}%</span></div></div>
+ <div class="card"><h2>오늘 할 운동 선택</h2><div class="field"><label for="todayPlanSelect">7개 세트 중 하나</label><select class="plan-select" id="todayPlanSelect" onchange="assignRoutine('${key}',this.value)">${planOptions(planId)}</select></div><div class="plan-note">요일과 관계없이 선택할 수 있으며 날짜별로 저장됩니다.<br>오늘의 기본 추천: <b>${routine[recommendedId].title}</b>${planId!==recommendedId?` · <button class="btn outline smallbtn" onclick="clearPlanSelection('${key}')">추천으로 복귀</button>`:''}</div></div>
+ <div class="card"><div class="row between"><div><h2>안전 확인</h2><div class="muted small">목 조임·어지럼·관절 통증이 있으면 강도를 낮추거나 중단</div></div><button class="btn outline smallbtn" onclick="startTimer(60)">60초 호흡</button></div></div>
+ <div class="section-title"><div><h2>준비운동</h2><div class="small muted">${warm.title}</div></div><div class="row"><span class="tag good">자동</span><button class="btn secondary smallbtn" onclick="completeSection('${key}','${planId}','warmup')">준비 완료</button></div></div>
+ <div class="warn-note" style="margin-bottom:12px">버피는 준비운동에서 제외합니다. 준비운동 동작 사이에는 정해진 세트 휴식이 없으며, 숨이 차면 20~30초만 쉬고 이어갑니다.</div>
+ <div id="todayWarmup">${warm.items.map((it,i)=>routineItem(key,planId,it,i,state,'warmup')).join('')}</div>
+ <div class="section-title"><h2>본운동</h2><button class="btn secondary smallbtn" onclick="completeSection('${key}','${planId}','main')">본운동 완료</button></div>
+ <div id="todayRoutine">${plan.items.map((it,i)=>routineItem(key,planId,it,i,state,'main')).join('')}</div>
+ <div class="section-title"><div><h2>매일 5분 보완 루틴</h2><div class="small muted">균형·가동성·코어 유지용이며 준비운동을 대신하지 않습니다.</div></div><span class="tag warn">선택</span></div>
+ <div class="card stack">${dailyMini.map(x=>`<div class="row between"><div><div class="strong">${x[1]}</div><div class="small muted">${x[2]}</div></div><button class="btn outline smallbtn" onclick="openExercise('${x[0]}')">자세</button></div>`).join('')}</div>
+ <div class="card"><div class="row between"><div><h2>휴식 타이머</h2><div class="small muted">각 운동 카드의 권장 버튼을 누르면 자동 설정됩니다.</div></div></div><div class="timer-context" id="timerContext">대기 중</div><div class="timer" id="timerDisplay">00:00</div><div class="timer-actions"><button class="btn secondary" onclick="startTimer(60,'수동 · 보조운동 60초')">60초</button><button class="btn secondary" onclick="startTimer(75,'수동 · 풀업 싱글 75초')">75초</button><button class="btn secondary" onclick="startTimer(90,'수동 · 주운동 90초')">90초</button><button class="btn secondary" onclick="startTimer(180,'수동 · 고난도 3분')">3분</button><button class="btn outline" onclick="stopTimer()">정지</button></div><div class="rest-guide"><div><b>3분</b><span class="small muted">엄격한 풀업, 4~5회 파이크처럼 고난도 저반복</span></div><div><b>90초</b><span class="small muted">푸시업·로우·런지 등 대부분의 주운동</span></div><div><b>60초</b><span class="small muted">코어·종아리·균형·가동성 보조운동</span></div></div><label class="toggle-line" style="margin-top:12px"><input type="checkbox" ${getSettings().autoRest?'checked':''} onchange="setAutoRest(this.checked)"><span>세트 완료 시 다음 세트가 남아 있으면 권장 휴식 자동 시작<br><span class="small muted">기본값은 꺼짐입니다. 좌우 운동은 양쪽을 모두 마친 뒤 세트 버튼을 누르십시오.</span></span></label><details><summary>휴식 시간을 조정하는 기준</summary><div class="detail-body"><ul><li>다음 세트 반복수가 2회 이상 줄거나 첫 반복부터 자세가 무너지면 한 단계 늘립니다.</li><li>발 보조 풀업·불가리안·발 올린 푸시업은 기본 90초, 한계에 가까우면 3분을 사용합니다.</li><li>준비운동은 타이머 없이 이어가고 숨이 차면 20~30초만 쉽니다.</li></ul></div></details></div>`;
+ updateTimer();
+}
+function routineItem(key,planId,it,i,state,section='main'){
+ const [exId,name,prescription,setsText]=it, id=taskId(key,planId,i,section), itemState=state[id]||{done:false,sets:[]};
+ const sets=Math.max(1,setCount(setsText)); const ex=safeEx(exId), rest=restProfileFor(it,section);
+ const restHtml=rest?`<div class="rest-row"><div class="rest-copy"><span class="rest-badge">${rest.kind} · ${rest.label}</span><div class="small muted" style="margin-top:5px">${restSideNote(exId)}${rest.note}</div></div><div class="rest-actions">${rest.sec?`<button class="btn secondary smallbtn" onclick="startRecommendedRest('${planId}',${i})">${rest.label} 시작</button>`:'<span class="tag">타이머 불필요</span>'}${rest.altSec?`<button class="btn outline smallbtn" onclick="startAlternateRest('${planId}',${i})">${rest.altLabel}로 연장</button>`:''}</div></div>`:'';
+ return `<div class="routine-item ${itemState.done?'done':''}" id="item-${section}-${i}">
+   <div class="routine-head"><div><div class="routine-name">${name}</div><div class="routine-meta">${prescription}</div></div><button class="check" aria-label="완료" onclick="toggleTask('${key}','${planId}',${i},'${section}')">✓</button></div>
+   <div class="set-grid">${Array.from({length:sets},(_,s)=>`<button class="set-chip ${itemState.sets?.[s]?'done':''}" onclick="toggleSet('${key}','${planId}',${i},${s},'${section}')">${sets===1?'완료':`${s+1}세트`}</button>`).join('')}</div>
+   ${restHtml}
+   ${exId in exercises?`<details><summary>정확한 자세 보기</summary><div class="detail-body"><b>핵심:</b> ${ex.steps[0]||''}<ul>${ex.steps.slice(1,4).map(x=>`<li>${x}</li>`).join('')}</ul><button class="btn outline smallbtn" onclick="openExercise('${exId}')">전체 설명</button></div></details>`:''}
+ </div>`
+}
+function toggleTask(key,planId,i,section='main'){const s=routineState(),id=taskId(key,planId,i,section);s[id]=s[id]||{done:false,sets:[]};s[id].done=!s[id].done;saveRoutineState(s);renderToday();toast(s[id].done?'완료로 기록했습니다':'완료를 취소했습니다')}
+function toggleSet(key,planId,i,seti,section='main'){const s=routineState(),id=taskId(key,planId,i,section),items=planItems(planId,section);s[id]=s[id]||{done:false,sets:[]};const turnedOn=!s[id].sets[seti];s[id].sets[seti]=turnedOn;const total=setCount(items[i][3]);s[id].done=s[id].sets.filter(Boolean).length>=total;saveRoutineState(s);renderToday();if(section==='main'&&turnedOn&&!s[id].done&&getSettings().autoRest){setTimeout(()=>startRecommendedRest(planId,i),0)}}
+function completeSection(key,planId,section){const s=routineState(),items=planItems(planId,section);items.forEach((it,i)=>{const n=setCount(it[3]);s[taskId(key,planId,i,section)]={done:true,sets:Array(n).fill(true)}});saveRoutineState(s);renderToday();toast(section==='warmup'?'준비운동을 완료했습니다':'본운동을 완료했습니다')}
+
+function renderWeek(){
+ const start=mondayStart(), todayKey=dateKey(), state=routineState();
+ const dates=Array.from({length:7},(_,i)=>addDays(start,i));
+ const selected=dates.map(d=>selectedPlanId(dateKey(d)));
+ const counts=routineOrder.map(id=>[id,selected.filter(x=>x===id).length]).filter(x=>x[1]);
+ $('#week').innerHTML=`<div class="hero"><div class="small">유연한 주간 배정</div><h1>요일마다 7개 세트 중 하나 선택</h1><p>선택한 세트에는 종목별 준비운동이 자동으로 먼저 붙습니다.</p><div class="assignment-tags">${counts.map(([id,n])=>`<span class="pill" style="background:#ffffff18;color:#fff;border-color:#ffffff36">${routine[id].title} ${n}회</span>`).join('')}</div></div>
+ <div class="card"><div class="row between"><div><h2>사용 원칙</h2><div class="small muted">같은 세트 중복도 허용하지만 근력 A·B·C를 연속 이틀 배치하는 것은 가급적 피하십시오. 준비운동은 본운동 전에 실시합니다.</div></div><button class="btn outline smallbtn" onclick="resetWeekAssignments()">기본 배정 복원</button></div></div>
+ ${dates.map((d,idx)=>{const key=dateKey(d),planId=selectedPlanId(key),p=routine[planId],w=warmups[planId],recommendedId=recommendedPlanId(key),progress=planCompletion(key,planId,state),prevId=idx?selectedPlanId(dateKey(dates[idx-1])):null;const consecutive=prevId&&routine[prevId].type==='근력'&&p.type==='근력';return `<div class="card week-day ${key===todayKey?'today':''}"><div class="row between"><div><h2>${DAYS[d.getDay()]}요일 · ${formatMonthDay(key)}</h2><span class="tag ${typeTagClass(p.type)}">${p.type}</span></div>${key===todayKey?'<span class="tag">오늘</span>':''}</div><div class="week-plan"><div class="field"><label>운동 세트</label><select class="plan-select" onchange="assignRoutine('${key}',this.value)">${planOptions(planId)}</select></div><div class="small muted">기본 추천: ${routine[recommendedId].title}${planId!==recommendedId?` · <button class="btn outline smallbtn" onclick="clearPlanSelection('${key}')">추천 복귀</button>`:''}</div>${consecutive?'<div class="warn-note">전날도 근력 세트입니다. 피로가 남으면 유산소·회복 세트로 바꾸십시오.</div>':''}<div class="week-progress"><div class="scorebar"><i style="width:${progress.pct}%"></i></div><span class="small strong">${progress.done}/${progress.total}</span></div><details><summary>준비 ${w.items.length}개 + 본운동 ${p.items.length}개 보기</summary><div class="detail-body stack"><div class="strong">준비운동 · ${w.title}</div>${w.items.map(it=>`<div class="row between"><div><div>${it[1]}</div><div class="small muted">${it[2]}</div></div>${it[0] in exercises?`<button class="btn outline smallbtn" onclick="openExercise('${it[0]}')">자세</button>`:''}</div>`).join('')}<div class="strong" style="margin-top:8px">본운동</div>${p.items.map(it=>{const r=restProfileFor(it);return `<div class="row between"><div><div>${it[1]}</div><div class="small muted">${it[2]}${r?` · 휴식 ${r.label}`:''}</div></div>${it[0] in exercises?`<button class="btn outline smallbtn" onclick="openExercise('${it[0]}')">자세</button>`:''}</div>`}).join('')}</div></details></div></div>`}).join('')}`
+}
+
+let libraryComposing=false;
+function exerciseSearchText(e){return [e.name,e.area,...e.setup,...e.steps,...e.errors,e.stop].join(' ').toLocaleLowerCase('ko-KR')}
+function exerciseCard(id,e){return `<article class="card exercise-card" id="ex-${id}"><div class="row between"><h2>${e.name}</h2><span class="tag">${e.area.split('·')[0]}</span></div><div class="muscle">${e.area}</div><div class="strong">시작 자세</div><ol>${e.setup.map(x=>`<li>${x}</li>`).join('')}</ol><div class="strong">실행 순서</div><ol>${e.steps.map(x=>`<li>${x}</li>`).join('')}</ol><div class="strong">흔한 오류</div><ul>${e.errors.map(x=>`<li>${x}</li>`).join('')}</ul><div class="cue"><b>중단·회귀 기준:</b> ${e.stop}</div></article>`}
+function updateLibraryResults(filter=''){
+ const query=filter.trim().toLocaleLowerCase('ko-KR');
+ const list=Object.entries(exercises).filter(([,e])=>!query||exerciseSearchText(e).includes(query));
+ const results=$('#exerciseResults');
+ if(results)results.innerHTML=list.map(([id,e])=>exerciseCard(id,e)).join('')||'<div class="empty">검색 결과가 없습니다.<br><span class="small">검색어를 지우거나 다른 단어를 입력하십시오.</span></div>';
+}
+function renderLibrary(filter){
+ const host=$('#library');
+ if(!host.querySelector('#exerciseFilter')){
+  host.innerHTML='<div class="exercise-search"><input id="exerciseFilter" type="search" placeholder="운동 이름, 부위 또는 자세 검색" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="운동 검색"></div><div id="exerciseResults"></div>';
+  const input=$('#exerciseFilter');
+  input.addEventListener('compositionstart',()=>{libraryComposing=true});
+  input.addEventListener('compositionend',()=>{libraryComposing=false;updateLibraryResults(input.value)});
+  input.addEventListener('input',()=>{if(!libraryComposing)updateLibraryResults(input.value)});
+  input.addEventListener('search',()=>updateLibraryResults(input.value));
+ }
+ const input=$('#exerciseFilter');
+ if(typeof filter==='string'&&input.value!==filter)input.value=filter;
+ updateLibraryResults(input.value);
+}
+function openExercise(id){switchView('library');renderLibrary('');setTimeout(()=>{document.getElementById('ex-'+id)?.scrollIntoView({behavior:'smooth',block:'start'})},50)}
+
+function getAssessments(){return storage.get('assessments',[{date:'2026-08-02',items:baseline}])}
+function renderTest(){const assessments=getAssessments(),latest=assessments[assessments.length-1];const total=latest.items.reduce((a,b)=>a+Number(b.score),0);$('#test').innerHTML=`
+ <div class="hero"><div class="small">현재 배치 등급</div><h1>${total}/36점 · 초급 후반~중급 초입</h1><p>총점보다 풀업·편측 하체·균형처럼 낮은 항목을 우선합니다.</p></div>
+ <div class="grid three"><div class="stat"><b>${total}</b><span>총점 / 36</span></div><div class="stat"><b>4</b><span>코어 최고점</span></div><div class="stat"><b>3회</b><span>현재 풀업</span></div></div>
+ <div class="card"><div class="row between"><h2>최근 수행능력 평가</h2><span class="small muted">${latest.date}</span></div>${latest.items.map(x=>`<div class="test-row"><div><div class="strong">${x.name}</div><div class="small muted">${x.result} · ${x.note}</div><div class="progress-wrap"><div class="scorebar"><i style="width:${x.score/4*100}%"></i></div></div></div><div class="score">${x.score}/4</div></div>`).join('')}</div>
+ <div class="card"><h2>새 평가 기록</h2><div class="warn-note">최대 반복 검사는 버피 없이 준비운동 후 이틀로 나눠 시행하십시오. 자세가 처음 무너지기 직전에 종료합니다.</div><form id="testForm" class="stack" style="margin-top:12px">${baseline.map(x=>`<div class="form-grid"><div class="field"><label>${x.name} 결과</label><input name="result-${x.id}" value="${x.result}" placeholder="예: 5회, 30초, 통과"></div><div class="field"><label>점수 0~4</label><select name="score-${x.id}">${[0,1,2,3,4].map(n=>`<option value="${n}" ${n===x.score?'selected':''}>${n}점 · ${testCriteria[x.id]?.[n]||''}</option>`).join('')}</select></div></div>`).join('')}<button type="button" class="btn" onclick="saveAssessment()">평가 저장</button></form></div>
+ <div class="card"><h2>목표</h2><div class="stack"><div class="row between"><span>엄격한 풀업</span><b>3 → 5회</b></div><div class="row between"><span>눈 감고 한발 서기</span><b>15~20초</b></div><div class="row between"><span>편측 하체</span><b>불가리안 3×8</b></div></div></div>`}
+function saveAssessment(){const form=new FormData($('#testForm'));const items=baseline.map(x=>({...x,result:form.get('result-'+x.id),score:Number(form.get('score-'+x.id)),note:Number(form.get('score-'+x.id))>=3?'양호':Number(form.get('score-'+x.id))===2?'강화 필요':'우선 개선'}));const all=getAssessments();all.push({date:dateKey(),items});storage.set('assessments',all);renderTest();toast('평가를 저장했습니다')}
+
+function getLogs(){return storage.get('workoutLogs',[])}
+function logWarmupOptions(status){return ['완료','일부','미실시','해당 없음'].map(x=>`<option ${x===status?'selected':''}>${x}</option>`).join('')}
+function syncLogDateDefaults(){const key=$('#logDate')?.value;if(!key)return;const planId=selectedPlanId(key),type=$('#logType'),warm=$('#logWarmup');if(type)type.value=routine[planId].title;if(warm)warm.value=warmupStatusFor(key)}
+function renderLog(){const logs=getLogs().sort((a,b)=>b.date.localeCompare(a.date));const todayKey=dateKey(),todayPlanTitle=routine[selectedPlanId(todayKey)].title,warmStatus=warmupStatusFor(todayKey),healthItems=getHealthWorkouts();$('#log').innerHTML=`
+ <div class="hero"><div class="small">운동 기록</div><h1>${logs.length}회 저장됨</h1><p>근력 일지와 Galaxy Watch의 달리기·수영 기록을 한곳에서 관리합니다.</p></div>
+ <div class="card health-card"><div class="row between"><div><h2>Galaxy Watch · Samsung Health</h2><div class="small muted">Health Connect를 통해 최근 30일 달리기·수영 기록을 읽기 전용으로 가져옵니다.</div></div><span class="tag">Android</span></div>${healthStatusView()}${healthSummary(healthItems)}<div class="row"><button class="btn" onclick="requestHealthPermissions()">권한 연결</button><button class="btn secondary" onclick="syncHealthWorkouts()">최근 30일 동기화</button><button class="btn outline" onclick="openHealthSettings()">권한 관리</button></div><div class="privacy-note">읽는 항목: 운동 세션, 거리, 심박수, 총소모 칼로리. GPS 경로는 읽지 않으며 데이터는 이 휴대폰 안에 저장됩니다.</div>${nativeHealthAvailable()?'':'<div class="native-only" style="margin-top:10px">현재 웹/PWA에서는 자동 연동이 동작하지 않습니다. 이 소스의 Android APK를 설치하면 사용할 수 있습니다.</div>'}<details><summary>Samsung Health 설정 확인</summary><div class="detail-body"><ol><li>Samsung Health에서 설정 → Health Connect를 엽니다.</li><li>운동, 거리, 심박수, 총소모 칼로리 공유를 허용합니다.</li><li>워치 운동 종료 후 Samsung Health를 열어 동기화한 다음 이 앱에서 ‘최근 30일 동기화’를 누릅니다.</li></ol></div></details><div class="section-title"><h2>동기화된 유산소 기록</h2><span class="small muted">최대 20개 표시</span></div>${healthWorkoutList(healthItems)}</div>
+ <div class="card"><h2>오늘 일지 작성</h2><form id="logForm" class="stack"><div class="form-grid"><div class="field"><label>날짜</label><input id="logDate" type="date" name="date" value="${todayKey}" onchange="syncLogDateDefaults()"></div><div class="field"><label>운동 종류</label><select id="logType" name="type">${routineOrder.map(id=>`<option ${routine[id].title===todayPlanTitle?'selected':''}>${routine[id].title}</option>`).join('')}<option>기타</option></select></div></div><div class="field"><label>준비운동 상태</label><select id="logWarmup" name="warmupStatus">${logWarmupOptions(warmStatus)}</select><div class="small muted">오늘 화면의 준비운동 체크 결과를 기본값으로 사용합니다.</div></div><div class="form-grid"><div class="field"><label>운동 시간(분)</label><input type="number" min="0" max="300" name="minutes" placeholder="예: 35"></div><div class="field"><label>RPE 1~10</label><input type="number" min="1" max="10" name="rpe" placeholder="예: 6"></div></div><div class="form-grid"><div class="field"><label>통증 0~10</label><input type="number" min="0" max="10" name="pain" value="0"></div><div class="field"><label>어지럼</label><select name="dizzy"><option value="없음">없음</option><option value="경미">경미</option><option value="명확">명확</option></select></div></div><div class="field"><label>세부 기록</label><textarea name="notes" placeholder="세트·반복, 준비운동 상태, 달리기 시간, 수영 거리, 다음 날 피로 등을 기록"></textarea></div><button type="button" class="btn" onclick="saveLog()">운동일지 저장</button></form></div>
+ <div class="card"><div class="row between"><h2>최근 기록</h2><div class="row"><button class="btn outline smallbtn" onclick="exportData()">내보내기</button><label class="btn outline smallbtn" style="cursor:pointer">가져오기<input type="file" accept="application/json" hidden onchange="importData(event)"></label></div></div><div id="logList">${logs.length?logs.map((l,i)=>`<div class="log"><div class="row between"><div><div class="log-title">${l.date} · ${l.type}${l.healthConnectId?'<span class="source-badge">Health Connect</span>':''}</div><div class="log-meta">${l.minutes||'-'}분 · RPE ${l.rpe||'-'} · 준비운동 ${l.warmupStatus||'미기록'} · 통증 ${l.pain||0} · 어지럼 ${l.dizzy}</div></div><button class="btn danger smallbtn" onclick="deleteLog(${i})">삭제</button></div>${l.notes?`<div class="small" style="margin-top:7px">${escapeHtml(l.notes)}</div>`:''}</div>`).join(''):'<div class="empty">저장된 운동일지가 없습니다.</div>'}</div></div>
+ <div class="card"><h2>최근 8회 RPE</h2><canvas id="chart" width="700" height="220"></canvas></div>
+ <div class="danger-note">실신·흉통·새로운 신경학적 증상, 회복되지 않는 호흡곤란이 있으면 앱 기록보다 진료가 우선입니다.</div>`;drawChart(logs.slice(0,8).reverse());if(nativeHealthAvailable()&&getHealthState().status==='unknown')setTimeout(requestHealthStatus,50)}
+
+function escapeHtml(s=''){return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]))}
+function saveLog(){const f=new FormData($('#logForm'));const o=Object.fromEntries(f.entries());if(!o.date){toast('날짜를 입력하십시오');return}const logs=getLogs();logs.push(o);storage.set('workoutLogs',logs);renderLog();toast('운동일지를 저장했습니다')}
+function deleteLog(displayIndex){const sorted=getLogs().sort((a,b)=>b.date.localeCompare(a.date));const target=sorted[displayIndex];const logs=getLogs();const idx=logs.findIndex(x=>x===target || JSON.stringify(x)===JSON.stringify(target));if(idx>=0)logs.splice(idx,1);storage.set('workoutLogs',logs);renderLog()}
+function drawChart(logs){const c=$('#chart');if(!c)return;const ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;for(let i=0;i<=5;i++){const y=20+i*(h-50)/5;ctx.beginPath();ctx.moveTo(35,y);ctx.lineTo(w-15,y);ctx.stroke()}if(!logs.length){ctx.fillStyle='#667085';ctx.font='18px sans-serif';ctx.fillText('기록을 저장하면 그래프가 표시됩니다.',120,110);return}const vals=logs.map(x=>Number(x.rpe)||0),step=(w-70)/Math.max(vals.length-1,1);ctx.strokeStyle='#2563eb';ctx.lineWidth=4;ctx.beginPath();vals.forEach((v,i)=>{const x=40+i*step,y=h-30-(v/10)*(h-60);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.fillStyle='#111827';vals.forEach((v,i)=>{const x=40+i*step,y=h-30-(v/10)*(h-60);ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();ctx.font='12px sans-serif';ctx.fillText(String(v),x-3,y-10)})}
+function exportPayload(){return {routineState:routineState(),planSelections:getPlanSelections(),appSettings:getSettings(),assessments:getAssessments(),logs:getLogs(),healthWorkouts:getHealthWorkouts(),healthConnectState:getHealthState()}}
+function exportData(){const json=JSON.stringify(exportPayload(),null,2),name=`bodyweight-coach-${dateKey()}.json`;if(window.AndroidHealth&&typeof window.AndroidHealth.saveBackup==='function'){window.AndroidHealth.saveBackup(json,name);return}const blob=new Blob([json],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function importData(ev){const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.routineState)storage.set('routineState',d.routineState);if(d.planSelections)storage.set('planSelections',d.planSelections);if(d.appSettings)storage.set('appSettings',d.appSettings);if(d.assessments)storage.set('assessments',d.assessments);if(d.logs)storage.set('workoutLogs',d.logs);if(d.healthWorkouts)storage.set('healthWorkouts',d.healthWorkouts);if(d.healthConnectState)storage.set('healthConnectState',d.healthConnectState);renderAll();toast('데이터를 가져왔습니다')}catch{toast('올바른 JSON 파일이 아닙니다')}};r.readAsText(file)}
+
+let timerId=null,timerLeft=0,timerContext='대기 중';function startTimer(sec,label='휴식'){stopTimer(false);timerLeft=sec;timerContext=label;updateTimer();timerId=setInterval(()=>{timerLeft--;updateTimer();if(timerLeft<=0){stopTimer(false);timerContext='완료';updateTimer();navigator.vibrate?.([200,100,200]);toast('휴식 시간이 끝났습니다')}},1000)}function stopTimer(reset=true){if(timerId)clearInterval(timerId);timerId=null;if(reset){timerLeft=0;timerContext='대기 중';updateTimer()}}function updateTimer(){const el=$('#timerDisplay'),ctx=$('#timerContext');if(el)el.textContent=`${String(Math.floor(timerLeft/60)).padStart(2,'0')}:${String(timerLeft%60).padStart(2,'0')}`;if(ctx)ctx.textContent=timerContext}
+function switchView(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===id));if(id==='today')renderToday();if(id==='week')renderWeek();if(id==='library')renderLibrary();if(id==='test')renderTest();if(id==='log')renderLog();window.scrollTo({top:0,behavior:'smooth'})}
+function renderAll(){renderToday();renderWeek();renderLibrary();renderTest();renderLog()}
+$$('.nav-btn').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
+$('#todayText').textContent=todayLabel();
+
+let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#installBtn').hidden=false});$('#installBtn').addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('#installBtn').hidden=true});
+if('serviceWorker' in navigator && !nativeHealthAvailable()){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}))}
+renderAll();
+</script>
+</body>
+</html>
